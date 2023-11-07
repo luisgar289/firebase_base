@@ -9,8 +9,8 @@ class HomeScreenController extends GetxController{
   var isEditing = false.obs;
   var cardHeight = 100.0.obs;
   //Control entrada de texto
-  TextEditingController titleController = TextEditingController();
-  TextEditingController meaningController = TextEditingController();
+  var titleController = TextEditingController();
+  var meaningController = TextEditingController();
   var isNewRegister = false.obs;
 
   Future<void> getData() async{
@@ -29,16 +29,29 @@ class HomeScreenController extends GetxController{
       Get.snackbar("Error", e.toString());
     }
   }
-  //TODO 1: Add a function to delete data from firebase
+  //TODO 1: Add a function to send data from firebase
   Future<void>SendData(String title, String meaning) async{
     var collection = FirebaseFirestore.instance.collection('word_bank');
-    WordModel someData = WordModel("LIBRO3", "probando", "id");
+    WordModel someData = WordModel(title, meaning, "");
     collection.add(someData.toJson());
   }
   //TODO 2: Add a function to update data from firebase
-  Future<void>UpdateData(String docId) async{
+  Future<void>UpdateData(String docId, String titleController, String meaningController) async{
     var collection = FirebaseFirestore.instance.collection('word_bank');
-    collection.doc(docId).update({'title': 'updated title', 'meaning': 'updated meaning'});
+    if (titleController == ""){
+      collection.doc(docId).update({
+        'meaning': meaningController
+      });
+    }
+    else if (meaningController == ""){
+      collection.doc(docId).update({
+        'title': titleController
+      });
+    }
   }
-
+  //TODO 3: Add a function to delete data from firebase
+  Future<void>DeleteData(String docId) async{
+    var collection = FirebaseFirestore.instance.collection('word_bank');
+    collection.doc(docId).delete();
+  }
 }

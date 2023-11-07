@@ -20,9 +20,40 @@ class HomePage extends StatelessWidget {
           return Scaffold(
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                homeScreenController.SendData(
-                    homeScreenController.titleController.text,
-                    homeScreenController.meaningController.text);
+                //mostrar un dialogo
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Add new bank word"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              decoration: const InputDecoration(
+                                  hintText: "Enter a title"),
+                              controller: homeScreenController.titleController,
+                            ),
+                            TextField(
+                              decoration: const InputDecoration(
+                                  hintText: "Enter a meaning"),
+                              controller: homeScreenController.meaningController,
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                homeScreenController.SendData(
+                                    homeScreenController.titleController.text,
+                                    homeScreenController.meaningController.text);
+                                homeScreenController.refresh();
+                                Navigator.pop(context);
+                              },
+                              child: const Text("Add"))
+                        ],
+                      );
+                    });
               },
               child: const Icon(Icons.add),
             ),
@@ -81,34 +112,40 @@ class HomePage extends StatelessWidget {
                                                   MainAxisAlignment.spaceAround,
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                SizedBox(
+                                                const SizedBox(
                                                   height: 10,
                                                 ),
-                                                Expanded(
+                                                 Expanded(
                                                   child: TextField(
-                                                    decoration: InputDecoration(
+                                                    decoration: const InputDecoration(
                                                         hintText:
                                                             "Update Title"),
+                                                    controller: homeScreenController.titleController,
+
                                                   ),
                                                 ),
-                                                SizedBox(
+                                                const SizedBox(
                                                   height: 10,
                                                 ),
-                                                Expanded(
+                                                 Expanded(
                                                   child: TextField(
-                                                    decoration: InputDecoration(
+                                                    decoration: const InputDecoration(
                                                         hintText:
                                                             "Update Meaning"),
+                                                    controller: homeScreenController.meaningController,
                                                   ),
                                                 ),
-                                                SizedBox(
+                                                const SizedBox(
                                                   height: 10,
                                                 ),
-                                                FloatingActionButton(onPressed: (){
-                                                  // homeScreenController.deleteData(
-                                                  //     homeScreenController
-                                                  //         .wordList[index].id);
-                                                }, child: Icon(Icons.update))
+                                                IconButton(onPressed: (){
+                                                  homeScreenController.UpdateData(
+                                                      homeScreenController
+                                                          .wordList[index].id!,
+                                                      homeScreenController.titleController.text,
+                                                      homeScreenController.meaningController.text);
+                                                  homeScreenController.refresh();
+                                                }, icon: Icon(Icons.update))
                                               ],
                                             ),
                                           ),
@@ -117,9 +154,10 @@ class HomePage extends StatelessWidget {
                                           children: [
                                             IconButton(
                                               onPressed: () {
-                                                // homeScreenController.deleteData(
-                                                //     homeScreenController
-                                                //         .wordList[index].id);
+                                                homeScreenController.DeleteData(
+                                                    homeScreenController
+                                                        .wordList[index].id!);
+                                                homeScreenController.refresh();
                                               },
                                               icon: const Icon(Icons.delete),
                                             ),
@@ -139,7 +177,7 @@ class HomePage extends StatelessWidget {
                                                 //     homeScreenController
                                                 //         .wordList[index].id);
                                               },
-                                              icon: const Icon(Icons.update),
+                                              icon: const Icon(Icons.expand_circle_down_outlined),
                                             ),
                                           ],
                                         )
