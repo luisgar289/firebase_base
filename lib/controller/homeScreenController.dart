@@ -12,18 +12,16 @@ class HomeScreenController extends GetxController{
   var titleController = TextEditingController();
   var meaningController = TextEditingController();
   var isNewRegister = false.obs;
+  var selectedIndex = "";
 
   Future<void> getData() async{
     try{
       QuerySnapshot words = await FirebaseFirestore.instance.collection('word_bank').orderBy("title").get();
       wordList.clear();
-      words.docs.forEach((element) {
+      for (var element in words.docs) {
         wordList.add(WordModel(element['title'], element['meaning'], element.id));
         print(element.id);
-      });
-      // for(var word in words.docs){
-      //   wordList.add(WordModel(word['title'], word['meaning'], word['id']));
-      // }
+      }
       isLoading.value = false;
     }catch(e){
       Get.snackbar("Error", e.toString());
@@ -36,17 +34,20 @@ class HomeScreenController extends GetxController{
     collection.add(someData.toJson());
   }
   //TODO 2: Add a function to update data from firebase
-  Future<void>UpdateData(String docId, String titleController, String meaningController) async{
+  Future<void> UpdateData(
+      String docId, String titleController, String meaningController) async {
     var collection = FirebaseFirestore.instance.collection('word_bank');
-    if (titleController == ""){
-      collection.doc(docId).update({
-        'meaning': meaningController
-      });
-    }
-    else if (meaningController == ""){
-      collection.doc(docId).update({
-        'title': titleController
-      });
+    if (titleController.isNotEmpty || meaningController.isNotEmpty) {
+      Map<String, dynamic> updateData = {};
+
+      if (titleController.isNotEmpty) {
+        updateData['title'] = titleController;
+      }
+
+      if (meaningController.isNotEmpty) {
+        updateData['meaning'] = meaningController;
+      }
+      collection.doc(docId).update(updateData);
     }
   }
   //TODO 3: Add a function to delete data from firebase

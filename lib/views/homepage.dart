@@ -1,7 +1,8 @@
 import 'package:firebase_base/controller/homeScreenController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/instance_manager.dart';
+
+import 'SearchPage.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
@@ -18,52 +19,100 @@ class HomePage extends StatelessWidget {
           //Recargar el controlador
           homeScreenController.refresh();
           return Scaffold(
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                //mostrar un dialogo
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text("Add new bank word"),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              decoration: const InputDecoration(
-                                  hintText: "Enter a title"),
-                              controller: homeScreenController.titleController,
+            floatingActionButton: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    Get.to(() => SearchPage());
+                  },
+                  mini: true,
+                  child: const Icon(Icons.search),
+                ),
+                SizedBox(
+                    height:
+                        16), // Ajusta el espacio entre los botones si es necesario
+                FloatingActionButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Agregar nuevo elemento"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextField(
+                                  decoration: const InputDecoration(
+                                      hintText: "Enter a title"),
+                                  controller:
+                                      homeScreenController.titleController,
+                                ),
+                                TextField(
+                                  decoration: const InputDecoration(
+                                      hintText: "Enter a meaning"),
+                                  controller:
+                                      homeScreenController.meaningController,
+                                ),
+                              ],
                             ),
-                            TextField(
-                              decoration: const InputDecoration(
-                                  hintText: "Enter a meaning"),
-                              controller: homeScreenController.meaningController,
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                              onPressed: () {
-                                homeScreenController.SendData(
-                                    homeScreenController.titleController.text,
-                                    homeScreenController.meaningController.text);
-                                homeScreenController.refresh();
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Add"))
-                        ],
-                      );
-                    });
-              },
-              child: const Icon(Icons.add),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  // Verificar si los campos de texto están vacíos
+                                  if (homeScreenController
+                                          .titleController.text.isEmpty ||
+                                      homeScreenController
+                                          .meaningController.text.isEmpty) {
+                                    // Mostrar un mensaje de error
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text("Error"),
+                                          content: const Text(
+                                              "Por favor, rellene todos los campos"),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text("OK"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    // Si los campos no están vacíos, proceder con el envío de datos
+                                    homeScreenController.SendData(
+                                      homeScreenController.titleController.text,
+                                      homeScreenController
+                                          .meaningController.text,
+                                    );
+                                    homeScreenController.refresh();
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child: const Text("Add"),
+                              )
+                            ],
+                          );
+                        });
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              ],
             ),
             appBar: AppBar(
               backgroundColor: Colors.yellow,
-              title: Text("Firebase TEST"),
+              title: const Text("Firebase TEST"),
             ),
             body: Center(
               child: homeScreenController.isLoading.value == true
-                  ? const CircularProgressIndicator(color: Colors.black,)
+                  ? const CircularProgressIndicator(
+                      color: Colors.black,
+                    )
                   : Obx(
                       () => ListView.separated(
                         itemBuilder: (BuildContext context, index) {
@@ -80,26 +129,31 @@ class HomePage extends StatelessWidget {
                                           MainAxisAlignment.spaceAround,
                                       children: [
                                         Obx(() => Column(
-                                          children: [
-                                            Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.5,
-                                              child: Text(
-                                                homeScreenController
-                                                    .wordList[index].title!,
-                                                style: TextStyle(fontSize: 24),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            Text(
-                                                homeScreenController
-                                                    .wordList[index].meaning!,
-                                                style: TextStyle(fontSize: 24),
-                                            overflow: TextOverflow.ellipsis,),
-                                          ],
-                                        )),
+                                              children: [
+                                                SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.5,
+                                                  child: Text(
+                                                    homeScreenController
+                                                        .wordList[index].title!,
+                                                    style: const TextStyle(
+                                                        fontSize: 24),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  homeScreenController
+                                                      .wordList[index].meaning!,
+                                                  style: const TextStyle(
+                                                      fontSize: 24),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            )),
                                         const SizedBox(
                                           width: 20,
                                         ),
@@ -107,46 +161,10 @@ class HomePage extends StatelessWidget {
                                           visible: homeScreenController
                                               .isEditing.value,
                                           child: Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceAround,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                 Expanded(
-                                                  child: TextField(
-                                                    decoration: const InputDecoration(
-                                                        hintText:
-                                                            "Update Title"),
-                                                    controller: homeScreenController.titleController,
-
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                 Expanded(
-                                                  child: TextField(
-                                                    decoration: const InputDecoration(
-                                                        hintText:
-                                                            "Update Meaning"),
-                                                    controller: homeScreenController.meaningController,
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                IconButton(onPressed: (){
-                                                  homeScreenController.UpdateData(
-                                                      homeScreenController
-                                                          .wordList[index].id!,
-                                                      homeScreenController.titleController.text,
-                                                      homeScreenController.meaningController.text);
-                                                  homeScreenController.refresh();
-                                                }, icon: Icon(Icons.update))
-                                              ],
+                                            child: Expandir().build(
+                                              context,
+                                              index,
+                                              homeScreenController,
                                             ),
                                           ),
                                         ),
@@ -163,6 +181,10 @@ class HomePage extends StatelessWidget {
                                             ),
                                             IconButton(
                                               onPressed: () {
+                                                homeScreenController
+                                                        .selectedIndex =
+                                                    homeScreenController
+                                                        .wordList[index].id!;
                                                 homeScreenController.isEditing
                                                     .toggle();
                                                 homeScreenController
@@ -173,11 +195,9 @@ class HomePage extends StatelessWidget {
                                                         : 100;
                                                 print(homeScreenController
                                                     .isEditing.value);
-                                                // homeScreenController.updateData(
-                                                //     homeScreenController
-                                                //         .wordList[index].id);
                                               },
-                                              icon: const Icon(Icons.expand_circle_down_outlined),
+                                              icon: const Icon(Icons
+                                                  .expand_circle_down_outlined),
                                             ),
                                           ],
                                         )
@@ -197,5 +217,48 @@ class HomePage extends StatelessWidget {
             ),
           );
         });
+  }
+}
+
+class Expandir {
+  @override
+  Widget build(BuildContext context, int index,
+      HomeScreenController homeScreenController) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: TextField(
+            decoration: const InputDecoration(hintText: "Update Title"),
+            controller: homeScreenController.titleController,
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: TextField(
+            decoration: const InputDecoration(hintText: "Update Meaning"),
+            controller: homeScreenController.meaningController,
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        IconButton(
+            onPressed: () {
+              homeScreenController.UpdateData(
+                  homeScreenController.wordList[index].id!,
+                  homeScreenController.titleController.text,
+                  homeScreenController.meaningController.text);
+              homeScreenController.refresh();
+            },
+            icon: const Icon(Icons.update))
+      ],
+    );
   }
 }
